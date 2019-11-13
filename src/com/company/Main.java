@@ -9,7 +9,7 @@ public class Main {
 
         String sourceFileName = "TMP_14 - one eng out";
 
-        String path = "C:\\Users\\Andrii Popovvych\\Downloads\\" + sourceFileName + ".csv";
+        String path = "C:\\Users\\Main\\Downloads\\" + sourceFileName + ".csv";
         InputOutput inputOutput = new InputOutput();
         Converter converter = new Converter();
         ArrayList<DescentLine> linesList = inputOutput.getFromFile(path);
@@ -40,29 +40,39 @@ public class Main {
         boolean flag = false;
         Main main = new Main();
         for(double i = 10000; i<=40000; i+=500){
-            for(double j = 39000; i<=80000; i+=1000){
-                for(double isa = -50; isa<=30; isa += 10){
-                    System.out.println(isa);
-                    if(!main.containsDescentLine(linesList, i, j, isa)){
+            for(double weight = 39000; weight<=80000; weight+=1000) {
+                boolean exist = false;
+                for (int j = -50; j <= 30; j += 10) {
+                    if (main.containsDescentLine(linesList, i, weight, j)) {
+                        exist = true;
+                    }
+                }
+                if (exist) {
+                    for (double isa = -50; isa <= 30; isa += 10) {
+
+                        if (!main.containsDescentLine(linesList, i, weight, isa)) {
+
+                            if (main.containsDescentLine(linesList, i - 500, weight, isa)) {
+                                DescentLine lowerLine = main.getIfontainsDescentLine(linesList, i - 500, weight, isa);
+                                if (!(lowerLine.getFuel() == 0)) {
+
+                                    if (main.containsDescentLine(linesList, i + 500, weight, isa)) {
+                                        DescentLine upperDescentLine = main.getIfontainsDescentLine(linesList, i + 500, weight, isa);
+                                        if (!(upperDescentLine.getFuel() == 0)) {
+                                            double ias = main.interpolate(lowerLine.getIas(), upperDescentLine.getIas());
+                                            double time = main.interpolate(lowerLine.getTime(), upperDescentLine.getTime());
+                                            double distance = main.interpolate(lowerLine.getDistance(), upperDescentLine.getDistance());
+                                            double fuel = main.interpolate(lowerLine.getFuel(), upperDescentLine.getFuel());
+
+                                            resultArray.add(new DescentLine(weight, isa, ias, i, time, distance, fuel));
 
 
-                        if(main.containsDescentLine(linesList, i-500, j, isa)){
-
-                            System.out.println("second If");
-                            DescentLine lowerLine = main.getIfontainsDescentLine(linesList, i-500, j, isa);
-                            if(main.containsDescentLine(linesList, i+500, j, isa)){
-                                DescentLine upperDescentLine = main.getIfontainsDescentLine(linesList, i+500, j, isa);
-                                double ias = main.interpolate(lowerLine.getIas(),upperDescentLine.getIas() );
-                                double time = main.interpolate(lowerLine.getTime(),upperDescentLine.getTime());
-                                double distance = main.interpolate(lowerLine.getDistance(), upperDescentLine.getDistance());
-                                double fuel = main.interpolate(lowerLine.getFuel(),upperDescentLine.getFuel());
-
-                                resultArray.add(new DescentLine(j,isa,ias,i,time,distance,fuel));
+                                            //  double weight, double isa, double ias, double altitude, double time, double distance, double fuel
 
 
-                              //  double weight, double isa, double ias, double altitude, double time, double distance, double fuel
-
-
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -70,15 +80,23 @@ public class Main {
             }
         }
 
-
+        System.out.println("lineListSize: " + linesList.size());
         linesList.removeAll(toRemove);
-        inputOutput.writeToFile(linesList,"C:\\Users\\Andrii Popovvych\\Downloads\\" + profileName + "1.csv", profileName);
-        inputOutput.writeToFile(resultArray, "C:\\Users\\Andrii Popovvych\\Downloads\\" + profileName + ".csv", profileName);
+        inputOutput.writeToFile(linesList,"C:\\Users\\Main\\Downloads\\" + profileName + "1.csv", profileName);
+        inputOutput.writeToFile(resultArray, "C:\\Users\\Main\\Downloads\\" + profileName + "_interpolated.csv", profileName);
 
+        int k = 0;
+        for (DescentLine descL :
+                linesList) {
+           if(linesList.contains(descL)){
+               k++;
+           }
+        }
+        System.out.println("k = " + k);
     }
 
-    public boolean containsDescentLine(ArrayList<DescentLine> linesList, double flightLevel, double mass, double isa){
-        for (DescentLine dl: linesList) {
+    public boolean containsDescentLine(ArrayList<DescentLine> descLines, double flightLevel, double mass, double isa){
+        for (DescentLine dl: descLines) {
             if(Double.compare(dl.getAltitude(),flightLevel)==0
                     && Double.compare(dl.getWeight(),mass)==0
                     && Double.compare(dl.getIsa(),isa)==0){
@@ -88,8 +106,8 @@ public class Main {
         return false;
     }
 
-    public DescentLine getIfontainsDescentLine(ArrayList<DescentLine> linesList, double flightLevel, double mass, double isa){
-        for (DescentLine dl: linesList) {
+    public DescentLine getIfontainsDescentLine(ArrayList<DescentLine> descLines, double flightLevel, double mass, double isa){
+        for (DescentLine dl: descLines) {
             if(Double.compare(dl.getAltitude(),flightLevel)==0
                     && Double.compare(dl.getWeight(),mass)==0
                     && Double.compare(dl.getIsa(),isa)==0)
@@ -97,7 +115,7 @@ public class Main {
                 return dl;
             }
         }
-        return new DescentLine();
+        return null;
     }
 
     public double interpolate(double lower, double upper){

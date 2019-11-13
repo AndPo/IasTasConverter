@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.Objects;
+
 public class DescentLine {
     private double weight = 0;
     private double isa = 0;
@@ -11,6 +13,12 @@ public class DescentLine {
     private double fuel = 0;
 
     public DescentLine(){}
+
+    public DescentLine(double weight, double isa, double altitude) {
+        this.weight = weight;
+        this.isa = isa;
+        this.altitude = altitude;
+    }
 
     public DescentLine(double weight, double isa, double ias, double altitude, double time, double distance, double fuel) {
         this.weight = weight;
@@ -107,5 +115,24 @@ public class DescentLine {
                 ", " + time +
                 ", " + distance +
                 ", " + fuel;
+    }
+
+    public String[] toStringArray() {
+        return this.toString().split(", ");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DescentLine that = (DescentLine) o;
+        return Double.compare(that.weight, weight) == 0 &&
+                Double.compare(that.isa, isa) == 0 &&
+                Double.compare(that.altitude, altitude) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(weight, isa, altitude);
     }
 }
