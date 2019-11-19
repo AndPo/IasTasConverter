@@ -9,12 +9,12 @@ import java.util.ArrayList;
 public class InputOutput {
 
     public ArrayList getFromFile(String string){
-        ArrayList<DescentLine> linesList = new ArrayList<>();
+        ArrayList<Line> linesList = new ArrayList<>();
         try (FileReader reader = new FileReader(string);
              BufferedReader br = new BufferedReader(reader)) {
             String line;
             while ((line = br.readLine()) != null) {
-                linesList.add(new DescentLine(line.split(",")));
+                linesList.add(new ClimbLine(line.split(",")));
             }
         } catch (IOException e) {
             System.err.format("IOException: %s%n", e);
@@ -27,7 +27,6 @@ public class InputOutput {
         sb.append("name, weight, isa, ias, altitude, time, distance, fuel");
         sb.append("\n");
         for (Object list :linesList) {
-            sb.append(profileName + " ,");
             sb.append(list.toString());
             sb.append("\n");
         }
